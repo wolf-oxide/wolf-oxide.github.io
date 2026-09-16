@@ -1,0 +1,195 @@
+/* ============ LATE-2000s AQUARIUM ============ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+  background: #001233;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* whole page is one table, very 2009 */
+#layout {
+  width: 100%;
+  min-height: 100vh;
+  border-collapse: collapse;
+}
+#water-cell {
+  padding: 30px 10px 10px;
+  background:
+    repeating-linear-gradient(
+      -12deg,
+      rgba(255,255,255,0.05) 0px,
+      rgba(255,255,255,0.05) 2px,
+      transparent 2px,
+      transparent 26px
+    ),
+    linear-gradient(#003366, #005f99 40%, #0077be 75%, #0aa);
+  position: relative;
+  vertical-align: top;
+}
+
+/* ---- beveled window frame, a la XP ---- */
+#tank-frame {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  border-collapse: separate;
+  table-layout: fixed;
+  background: #000082;
+  border: 3px outset #3b6ea5;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.45);
+}
+
+#tank-header {
+  background: linear-gradient(180deg, #4993e6, #0a52c0 50%, #0842a0);
+  padding: 6px 12px;
+  font-weight: bold;
+  font-size: 18px;
+  text-shadow: 1px 1px 2px #000;
+  letter-spacing: 2px;
+  border-bottom: 2px inset #3b6ea5;
+}
+#tank-header h1 { font-size: inherit; margin: 0; }
+
+.blink { animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---- the tank itself ---- */
+#tank {
+  position: relative;
+  height: 460px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.18) 0 30px, transparent 60px),
+    radial-gradient(circle at 80% 12%, rgba(255,255,255,0.12) 0 40px, transparent 80px),
+    linear-gradient(180deg, #0b6fa8 0%, #075a8f 55%, #04507d 100%);
+  border-top: 2px inset #3b6ea5;
+  border-bottom: 2px inset #3b6ea5;
+}
+
+#sand {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 46px;
+  background:
+    radial-gradient(circle at 10% 40%, #e8d59a 0 8px, transparent 9px),
+    radial-gradient(circle at 35% 70%, #d9c37e 0 6px, transparent 7px),
+    radial-gradient(circle at 70% 30%, #e8d59a 0 7px, transparent 8px),
+    radial-gradient(circle at 90% 60%, #d9c37e 0 6px, transparent 7px),
+    linear-gradient(180deg, #e3cf8f, #c9ad66);
+  border-top: 3px solid #b09649;
+}
+
+/* bubbles */
+.bubble {
+  position: absolute;
+  bottom: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.15));
+  border: 1px solid rgba(255,255,255,0.5);
+  animation: rise linear infinite;
+  pointer-events: none;
+}
+@keyframes rise {
+  to { transform: translateY(-540px) translateX(30px); opacity: 0; }
+}
+
+/* ---- FISH ---- */
+.fish {
+  position: absolute;
+  width: 70px;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  z-index: 5;
+}
+.fish img {
+  width: 100%;
+  image-rendering: auto;
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,0.35));
+}
+.fish.flip img { transform: scaleX(-1); }
+.fish:hover { z-index: 20; }
+.fish:hover img { transform: scale(1.25) rotate(-4deg); }
+.fish.flip:hover img { transform: scaleX(-1) scale(1.25) rotate(4deg); }
+
+.fish .label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffef9f;
+  text-shadow: 1px 1px 2px #000, 0 0 6px #000;
+  white-space: nowrap;
+  overflow: visible;
+  width: max-content;
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+/* wiggle while swimming */
+.fish img { animation: wiggle 1.6s ease-in-out infinite; }
+@keyframes wiggle {
+  0%, 100% { margin-top: 0; } 50% { margin-top: -6px; }
+}
+
+/* ---- footer table, very 2009 ---- */
+#tank-footer {
+  background: repeating-linear-gradient(45deg, #1a1a7a, #1a1a7a 10px, #202090 10px, #202090 20px);
+  padding: 12px;
+  font-size: 13px;
+}
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(0,0,0,0.35);
+}
+.info-table td {
+  border: 2px inset #5a5ac0;
+  padding: 6px 10px;
+  vertical-align: top;
+}
+.cell-title {
+  width: 110px;
+  font-weight: bold;
+  color: #7fd4ff;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.counter {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 12px;
+  color: #b6ffb6;
+}
+#hitcount {
+  font-family: "Courier New", monospace;
+  background: #000;
+  color: #0f0;
+  border: 2px inset #444;
+  padding: 1px 6px;
+  letter-spacing: 3px;
+}
+
+#credit {
+  text-align: center;
+  font-size: 11px;
+  color: #9fd7ff;
+  margin-top: 14px;
+  text-shadow: 1px 1px 1px #000;
+}
+
+a { color: #7fd4ff; }
+a:visited { color: #d97fff; }
+a:hover { color: #ffe95c; }
+
+/* respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  .blink,
+  .fish img,
+  .bubble {
+    animation: none;
+  }
+}
