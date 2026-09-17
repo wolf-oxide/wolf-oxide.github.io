@@ -9,6 +9,9 @@ body {
   overflow-x: hidden;
 }
 
+[lang="ko"] { font-family: "Gamja Flower", "Comic Relief", cursive; }
+[lang="ja"] { font-family: "Hachi Maru Pop", "Comic Relief", cursive; }
+
 /* whole page is one table, very 2009 */
 #layout {
   width: 100%;
@@ -111,6 +114,7 @@ body {
   image-rendering: auto;
   filter: drop-shadow(0 3px 3px rgba(0,0,0,0.35));
 }
+.fish-big { width: 105px; }
 .fish.flip img { transform: scaleX(-1); }
 .fish:hover { z-index: 20; }
 .fish:hover img { transform: scale(1.25) rotate(-4deg); }

@@ -16,36 +16,44 @@ const FISHES = [
   {
     img: "data:image/svg+xml;utf8," + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40">' +
-      '<path d="M6 20 Q20 4 40 14 L54 4 L50 20 L54 36 L40 26 Q20 36 6 20 Z" fill="#ff8c00" stroke="#a34a00" stroke-width="2"/>' +
-      '<circle cx="20" cy="17" r="4" fill="#fff"/><circle cx="20" cy="17" r="2" fill="#000"/>' +
-      '<path d="M26 20 Q34 24 42 20" stroke="#a34a00" stroke-width="2" fill="none"/></svg>'),
-    label: "My github",
+      '<path d="M2 20 Q8 13 24 13 L48 15 L60 7 L55 20 L60 33 L48 25 L24 27 Q8 27 2 20 Z" fill="#3f474f" stroke="#8b949e" stroke-width="2"/>' +
+      '<path d="M24 13 L27 8 L32 13 Z" fill="#3f474f" stroke="#8b949e" stroke-width="1.5"/>' +
+      '<path d="M18 25 L21 30 L26 25 Z" fill="#3f474f" stroke="#8b949e" stroke-width="1.5"/>' +
+      '<path d="M10 16 Q8 20 10 24" stroke="#8b949e" stroke-width="2" fill="none"/>' +
+      '<path d="M6 21 Q20 18 40 19" stroke="#8b949e" stroke-width="1.5" fill="none"/>' +
+      '<circle cx="9" cy="17" r="3" fill="#fff"/><circle cx="9" cy="17" r="1.5" fill="#000"/></svg>'),
+    label: "My GitHub",
     url: "https://github.com/wolf-oxide"
   },
   {
+    big: true,
     img: "data:image/svg+xml;utf8," + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40">' +
-      '<path d="M6 20 Q20 4 40 14 L54 4 L50 20 L54 36 L40 26 Q20 36 6 20 Z" fill="#ff4f9a" stroke="#8f1e56" stroke-width="2"/>' +
-      '<circle cx="20" cy="17" r="4" fill="#fff"/><circle cx="20" cy="17" r="2" fill="#000"/>' +
-      '<path d="M26 20 Q34 24 42 20" stroke="#8f1e56" stroke-width="2" fill="none"/></svg>'),
+      '<path d="M46 20 Q54 10 62 4 Q58 12 58 20 Q58 28 62 36 Q54 30 46 20 Z" fill="#1d9bf0" stroke="#0a5c94" stroke-width="2"/>' +
+      '<path d="M26 10 Q30 0 38 2 Q34 6 36 10 Z" fill="#1d9bf0" stroke="#0a5c94" stroke-width="2"/>' +
+      '<path d="M2 22 Q8 10 24 10 Q42 10 46 20 Q42 30 24 30 Q8 30 2 22 Z" fill="#1d9bf0" stroke="#0a5c94" stroke-width="2"/>' +
+      '<path d="M24 28 L30 37 L36 28 Z" fill="#1d9bf0" stroke="#0a5c94" stroke-width="2"/>' +
+      '<path d="M14 16 Q12 20 14 24 M18 16 Q16 20 18 24 M22 16 Q20 20 22 24" stroke="#0a5c94" stroke-width="2" fill="none"/>' +
+      '<path d="M3 22 Q10 27 20 26" stroke="#0a5c94" stroke-width="2" fill="none"/>' +
+      '<circle cx="10" cy="17" r="3.5" fill="#fff"/><circle cx="10" cy="17" r="1.8" fill="#000"/></svg>'),
     label: "Twitter (main)",
     url: "https://x.com/wolf_oxide"
   },
   {
     img: "data:image/svg+xml;utf8," + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40">' +
-      '<path d="M6 20 Q20 4 40 14 L54 4 L50 20 L54 36 L40 26 Q20 36 6 20 Z" fill="#39d353" stroke="#14641f" stroke-width="2"/>' +
+      '<path d="M6 20 Q20 4 40 14 L54 4 L50 20 L54 36 L40 26 Q20 36 6 20 Z" fill="#2b2b2b" stroke="#5c5c5c" stroke-width="2"/>' +
       '<circle cx="20" cy="17" r="4" fill="#fff"/><circle cx="20" cy="17" r="2" fill="#000"/>' +
-      '<path d="M26 20 Q34 24 42 20" stroke="#14641f" stroke-width="2" fill="none"/></svg>'),
+      '<path d="M26 20 Q34 24 42 20" stroke="#5c5c5c" stroke-width="2" fill="none"/></svg>'),
     label: "Twitter (sub)",
     url: "https://x.com/wolf_quartz"
   },
   {
     img: "data:image/svg+xml;utf8," + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40">' +
-      '<path d="M6 20 Q20 4 40 14 L54 4 L50 20 L54 36 L40 26 Q20 36 6 20 Z" fill="#ffe95c" stroke="#8f7a00" stroke-width="2"/>' +
+      '<path d="M6 20 Q20 4 40 14 L54 4 L50 20 L54 36 L40 26 Q20 36 6 20 Z" fill="#0085ff" stroke="#0057a3" stroke-width="2"/>' +
       '<circle cx="20" cy="17" r="4" fill="#fff"/><circle cx="20" cy="17" r="2" fill="#000"/>' +
-      '<path d="M26 20 Q34 24 42 20" stroke="#8f7a00" stroke-width="2" fill="none"/></svg>'),
+      '<path d="M26 20 Q34 24 42 20" stroke="#0057a3" stroke-width="2" fill="none"/></svg>'),
     label: "Bluesky",
     url: "https://bsky.app/profile/wolf-oxide.bsky.social"
   }
@@ -65,6 +73,7 @@ FISHES.forEach((data, i) => {
   const el = document.createElement("a");
   el.href = data.url;
   el.className = "fish";
+  if (data.big) el.classList.add("fish-big");
   el.target = data.url.startsWith("#") ? "_self" : "_blank";
   el.rel = "noopener noreferrer";
   el.innerHTML = '<img src="' + data.img + '" alt=""><span class="label"></span>';
@@ -73,6 +82,7 @@ FISHES.forEach((data, i) => {
 
   fishObjs.push({
     el,
+    big: !!data.big,
     x: rand(20, tank.clientWidth - 110),
     y: 40 + i * (tank.clientHeight - 140) / FISHES.length,
     vx: rand(0.4, 1.1) * (Math.random() < 0.5 ? -1 : 1),
