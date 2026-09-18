@@ -2,6 +2,8 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+:root { color-scheme: light; }
+
 body {
   font-family: "Comic Relief", "Comic Neue", "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
   background: #001233;
