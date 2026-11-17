@@ -1,7 +1,7 @@
 /* =========================================================
    ADD A NEW FISH HERE!
    ---------------------------------------------------------
-   Just add an entry to the FISHES array:
+   Add an entry to the FISHES array:
 
    {
      img:   "fish/myfish.png",   // path to the image
@@ -9,7 +9,7 @@
      url:   "https://..."        // link it swims to
    }
 
-   Then drop the image in the fish/ folder. Done.
+   Add `big: true` for a larger fish.
    ========================================================= */
 
 const FISHES = [
@@ -83,111 +83,405 @@ const FISHES = [
   }
 ];
 
-/* ---------------- swimming logic ---------------- */
+/* ---------------- decorative sea life ---------------- */
+
+const svgURI = (viewBox, inner) =>
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + viewBox + '">' + inner + '</svg>');
+
+const SEA_LIFE = {
+  sardines: {
+    width: 150, maxVW: 0.34, maxVH: 0.18, aspect: 0.615,
+    speed: 0.55, bob: 5, bobSpeed: 1.2, opacity: 0.92,
+    img: svgURI("0 0 130 80", `
+      <defs>
+        <g id="sardine">
+          <path d="M0 6 Q10 -1 24 2 L38 0 L35 6 L38 13 L24 11 Q10 13 0 6 Z"
+                fill="#7fb6cf" stroke="#2f5b70" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M4 8 Q13 9 24 8 L31 7" fill="none" stroke="#d7eef6" stroke-width="1.8" opacity=".65"/>
+          <circle cx="8" cy="5.5" r="1.3" fill="#12303e"/>
+        </g>
+      </defs>
+      <use href="#sardine" transform="translate(6 8) rotate(-8)"/>
+      <use href="#sardine" transform="translate(48 30) rotate(5) scale(.92)"/>
+      <use href="#sardine" transform="translate(18 54) rotate(-4) scale(.82)"/>
+      <use href="#sardine" transform="translate(76 56) rotate(8) scale(.74)"/>
+      <use href="#sardine" transform="translate(74 10) rotate(-2) scale(.66)"/>
+    `)
+  },
+  anchovies: {
+    width: 220, maxVW: 0.48, maxVH: 0.26, aspect: 0.65,
+    speed: 0.9, bob: 4, bobSpeed: 1.7, opacity: 0.82,
+    img: svgURI("0 0 200 130", `
+      <defs>
+        <g id="anchovy">
+          <path d="M0 4 Q5 0 11 1.5 L17 0 L15 4 L17 8 L11 6.5 Q5 8 0 4 Z"/>
+          <circle cx="3" cy="3.6" r=".8" fill="#2b5568"/>
+        </g>
+      </defs>
+      <use href="#anchovy" transform="translate(14 60) rotate(-8) scale(1.15)" fill="#a9dcef"/>
+      <use href="#anchovy" transform="translate(34 48) rotate(-5) scale(1)" fill="#8ed0e8"/>
+      <use href="#anchovy" transform="translate(40 72) rotate(-10) scale(.9)" fill="#c6edf9" opacity=".8"/>
+      <use href="#anchovy" transform="translate(56 58) rotate(-3) scale(1.1)" fill="#9ed8ee"/>
+      <use href="#anchovy" transform="translate(66 38) rotate(-7) scale(.85)" fill="#7cc6e2" opacity=".75"/>
+      <use href="#anchovy" transform="translate(76 78) rotate(-12) scale(.95)" fill="#a9dcef"/>
+      <use href="#anchovy" transform="translate(86 52) rotate(-4) scale(1.05)" fill="#c6edf9"/>
+      <use href="#anchovy" transform="translate(100 66) rotate(-9) scale(.9)" fill="#8ed0e8" opacity=".85"/>
+      <use href="#anchovy" transform="translate(110 40) rotate(-2) scale(.8)" fill="#9ed8ee" opacity=".8"/>
+      <use href="#anchovy" transform="translate(118 82) rotate(-8) scale(.85)" fill="#c6edf9" opacity=".78"/>
+      <use href="#anchovy" transform="translate(128 56) rotate(-5) scale(1)" fill="#7cc6e2"/>
+      <use href="#anchovy" transform="translate(144 70) rotate(-10) scale(.9)" fill="#a9dcef" opacity=".9"/>
+      <use href="#anchovy" transform="translate(152 44) rotate(-3) scale(.8)" fill="#c6edf9" opacity=".75"/>
+      <use href="#anchovy" transform="translate(164 60) rotate(-7) scale(.95)" fill="#8ed0e8"/>
+      <use href="#anchovy" transform="translate(178 50) rotate(-4) scale(.75)" fill="#9ed8ee" opacity=".7"/>
+      <use href="#anchovy" transform="translate(60 92) rotate(-11) scale(.8)" fill="#a9dcef" opacity=".72"/>
+      <use href="#anchovy" transform="translate(94 92) rotate(-6) scale(.8)" fill="#c6edf9" opacity=".7"/>
+      <use href="#anchovy" transform="translate(136 90) rotate(-8) scale(.75)" fill="#8ed0e8" opacity=".72"/>
+      <use href="#anchovy" transform="translate(24 84) rotate(-7) scale(.85)" fill="#c6edf9" opacity=".75"/>
+      <use href="#anchovy" transform="translate(70 24) rotate(-2) scale(.7)" fill="#9ed8ee" opacity=".65"/>
+      <use href="#anchovy" transform="translate(118 24) rotate(-5) scale(.65)" fill="#a9dcef" opacity=".6"/>
+      <use href="#anchovy" transform="translate(156 86) rotate(-9) scale(.7)" fill="#7cc6e2" opacity=".7"/>
+    `)
+  }
+};
+
+/* ---------------- setup ---------------- */
 
 const tank = document.getElementById("tank");
+const bubbles = document.getElementById("bubbles");
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-function rand(min, max) {
-  return Math.random() * (max - min) + min;
-}
+const rand = (min, max) => Math.random() * (max - min) + min;
 
 const fishObjs = [];
+const lifeObjs = [];
+const TOP_PAD = 40;
+const BOTTOM_PAD = 92; // seabed + breathing room
 
-FISHES.forEach((data, i) => {
+let W = 0;
+let H = 0;
+
+/* ---------------- build the fish ---------------- */
+
+FISHES.forEach((data) => {
   const el = document.createElement(data.url ? "a" : "div");
-  el.className = "fish";
-  if (data.big) el.classList.add("fish-big");
+  el.className = "fish" + (data.big ? " fish-big" : "");
+
   if (data.url) {
     el.href = data.url;
-    el.target = data.url.startsWith("#") ? "_self" : "_blank";
+    el.target = "_blank";
     el.rel = "noopener noreferrer";
+  } else {
+    // decorative mascot: not a link, not announced
+    el.setAttribute("aria-hidden", "true");
   }
-  el.innerHTML = '<img src="' + data.img + '" alt=""><span class="label"></span>';
-  el.querySelector(".label").textContent = data.label;
+
+  const sprite = document.createElement("span");
+  sprite.className = "fish-sprite";
+
+  const img = document.createElement("img");
+  img.src = data.img;
+  img.alt = "";
+  img.draggable = false;
+
+  sprite.appendChild(img);
+  el.appendChild(sprite);
+
+  if (data.label) {
+    const label = document.createElement("span");
+    label.className = "label";
+    label.textContent = data.label;
+    el.appendChild(label);
+  }
+
   tank.appendChild(el);
 
   fishObjs.push({
     el,
-    big: !!data.big,
-    x: rand(20, tank.clientWidth - 110),
-    y: 40 + i * (tank.clientHeight - 140) / FISHES.length,
-    vx: rand(0.4, 1.1) * (Math.random() < 0.5 ? -1 : 1),
+    x: 0,
+    y: 0,
+    maxX: 0,
+    vx: rand(0.35, 0.95) * (Math.random() < 0.5 ? -1 : 1),
     pause: 0,
-    hold: false
+    hold: false,
+    placed: false
   });
 });
 
-// pause a fish while hovered or keyboard-focused so it's easier to click
-fishObjs.forEach(f => {
+let lifeKey = "";
+
+function lifePlan() {
+  // more schools on larger screens, with a couple kept even on phones
+  const area = tank.clientWidth * tank.clientHeight;
+  const sardines = Math.min(5, Math.max(2, Math.round(area / 280000)));
+  const anchovies = Math.min(5, Math.max(2, Math.round(area / 360000)));
+  const total = Math.max(sardines, anchovies);
+  const plan = [];
+
+  // alternate the two kinds so they spread across the tank instead of clumping
+  for (let i = 0; i < total; i++) {
+    if (i < sardines) plan.push("sardines");
+    if (i < anchovies) plan.push("anchovies");
+  }
+
+  return plan;
+}
+
+function syncSeaLife() {
+  const plan = lifePlan();
+  const key = plan.join(",");
+
+  if (key === lifeKey) return;
+  lifeKey = key;
+
+  lifeObjs.forEach((o) => o.el.remove());
+  lifeObjs.length = 0;
+
+  const total = plan.length;
+
+  plan.forEach((kind, i) => {
+    const template = SEA_LIFE[kind];
+
+    // vary size, speed and opacity to give the schools some depth
+    const depth = rand(0.45, 1);
+    const scale = 0.72 + depth * 0.32;
+    const data = {
+      img: template.img,
+      aspect: template.aspect,
+      width: template.width * scale,
+      maxVW: template.maxVW * scale,
+      maxVH: template.maxVH * scale,
+      speed: template.speed * (0.75 + depth * 0.35),
+      bob: template.bob * (0.7 + depth * 0.5),
+      bobSpeed: template.bobSpeed,
+      opacity: template.opacity * (0.65 + depth * 0.35),
+      y: Math.min(0.86, Math.max(0.06,
+        0.10 + (i / Math.max(1, total - 1)) * 0.76 + rand(-0.025, 0.025)))
+    };
+
+    const el = document.createElement("div");
+    el.className = "sea-life";
+    el.setAttribute("aria-hidden", "true");
+    el.style.opacity = data.opacity;
+
+    const img = document.createElement("img");
+    img.src = data.img;
+    img.alt = "";
+    img.draggable = false;
+
+    el.appendChild(img);
+    tank.appendChild(el);
+
+    lifeObjs.push({
+      el,
+      data,
+      x: 0,
+      baseY: 0,
+      w: 0,
+      h: 0,
+      vx: data.speed * (i % 2 === 0 ? 1 : -1),
+      phase: rand(0, Math.PI * 2),
+      slot: i,
+      total,
+      placed: false
+    });
+  });
+}
+
+syncSeaLife();
+
+/* ---------------- swimming ---------------- */
+
+function measure() {
+  W = tank.clientWidth;
+  H = tank.clientHeight;
+
+  // skip while hidden or laying out, so fish never pile up at the edge
+  if (W < 10 || H < 10) return;
+
+  tank.style.setProperty("--rise", (H + 80) + "px");
+
+  const short = window.innerHeight < 620;
+  const topPad = short ? 14 : TOP_PAD;
+  const bottomPad = short ? 64 : BOTTOM_PAD;
+  const lanes = Math.max(1, fishObjs.length - 1);
+
+  fishObjs.forEach((f, i) => {
+    const fw = f.el.offsetWidth;
+    const fh = f.el.offsetHeight;
+    const minY = topPad;
+    const maxY = Math.max(topPad, H - bottomPad - fh);
+
+    f.maxX = Math.max(4, W - fw - 6);
+    f.y = Math.round(minY + ((maxY - minY) / lanes) * i);
+
+    if (!f.placed) {
+      // spread the first impression across the tank
+      const span = f.maxX - 4;
+      const base = 4 + (span * i) / Math.max(1, fishObjs.length - 1);
+      f.x = Math.round(Math.min(f.maxX, Math.max(4, base + rand(-span * 0.03, span * 0.03))));
+      f.placed = true;
+    } else {
+      f.x = Math.min(Math.max(4, f.x), f.maxX);
+    }
+  });
+
+  lifeObjs.forEach((o) => {
+    const w = Math.min(o.data.width, W * o.data.maxVW, (H * o.data.maxVH) / o.data.aspect);
+
+    o.w = Math.round(w);
+    o.h = Math.round(w * o.data.aspect);
+    o.el.style.width = o.w + "px";
+
+    const usable = Math.max(0, H - bottomPad - o.h);
+    o.baseY = Math.round(12 + usable * o.data.y);
+
+    if (!o.placed) {
+      const slotW = (W - o.w) / Math.max(1, o.total);
+      o.x = Math.min(W - o.w, Math.max(0, slotW * o.slot + rand(0, Math.max(0, slotW))));
+      // start by swimming inward from whichever side they spawned on
+      o.vx = Math.abs(o.vx) * (o.x < W / 2 ? 1 : -1);
+      o.placed = true;
+    } else if (o.x > W + 20 || o.x < -o.w - 20) {
+      o.x = rand(0, Math.max(0, W - o.w));
+    }
+
+    o.el.classList.toggle("flip", o.vx > 0);
+    o.el.style.transform = "translate3d(" + o.x + "px, " + o.baseY + "px, 0)";
+  });
+}
+
+function draw() {
+  fishObjs.forEach((f) => {
+    f.el.classList.toggle("flip", f.vx > 0);
+    f.el.style.left = f.x + "px";
+    f.el.style.top = f.y + "px";
+  });
+}
+
+// pause a link while hovered or keyboard-focused so it is easier to click
+fishObjs.forEach((f) => {
+  if (f.el.tagName !== "A") return;
   f.el.addEventListener("mouseenter", () => { f.hold = true; });
   f.el.addEventListener("mouseleave", () => { f.hold = false; });
   f.el.addEventListener("focus", () => { f.hold = true; });
   f.el.addEventListener("blur", () => { f.hold = false; });
 });
 
-let W = tank.clientWidth, H = tank.clientHeight;
-window.addEventListener("resize", () => {
-  W = tank.clientWidth;
-  H = tank.clientHeight;
-});
-
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-let ticking = false;
-
-function tick() {
-  if (reduceMotion.matches) {
-    // static aquarium: fish stay put, but keep links visible & clickable
-    ticking = false;
-    fishObjs.forEach(f => {
-      f.el.classList.toggle("flip", false);
-      f.el.style.left = f.x + "px";
-      f.el.style.top = f.y + "px";
-    });
-    return;
-  }
-  ticking = true;
-  fishObjs.forEach(f => {
-    if (f.hold) {
-      // hovered/focused: hold still so it can be clicked
-    } else if (f.pause > 0) {
-      f.pause--;
-    } else {
-      if (Math.random() < 0.0008) f.pause = rand(30, 70) | 0; // occasionally stop & float
-      f.x += f.vx;
+function step(dt) {
+  fishObjs.forEach((f) => {
+    if (!f.hold) {
+      if (f.pause > 0) {
+        f.pause -= dt;
+      } else {
+        if (Math.random() < 0.002 * dt) f.pause = rand(40, 90); // stop & float a moment
+        f.x += f.vx * dt;
+      }
     }
 
-    // bounce off glass
     if (f.x < 4) { f.x = 4; f.vx = Math.abs(f.vx); }
-    if (f.x > W - 78) { f.x = W - 78; f.vx = -Math.abs(f.vx); }
-
-    // sprite drawn facing LEFT; flip when moving right
-    f.el.classList.toggle("flip", f.vx > 0);
-    f.el.style.left = f.x + "px";
-    f.el.style.top = f.y + "px";
+    if (f.x > f.maxX) { f.x = f.maxX; f.vx = -Math.abs(f.vx); }
   });
-  requestAnimationFrame(tick);
-}
-tick();
 
-// resume/pause when the OS setting changes mid-session
-if (reduceMotion.addEventListener) {
-  reduceMotion.addEventListener("change", () => {
-    if (!reduceMotion.matches && !ticking) tick();
+  draw();
+}
+
+function stepLife(dt, t) {
+  lifeObjs.forEach((o) => {
+    o.x += o.vx * dt;
+
+    if (o.vx > 0 && o.x > W + 20) o.x = -o.w - 20;
+    if (o.vx < 0 && o.x < -o.w - 20) o.x = W + 20;
+
+    const bob = Math.sin(t * o.data.bobSpeed + o.phase) * o.data.bob;
+
+    o.el.classList.toggle("flip", o.vx > 0);
+    o.el.style.transform = "translate3d(" + o.x + "px, " + (o.baseY + bob) + "px, 0)";
   });
 }
+
+let rafId = 0;
+let lastTime = 0;
+
+function frame(now) {
+  if (reduceMotion.matches) {
+    rafId = 0;
+    draw();
+    return;
+  }
+
+  if (!lastTime) lastTime = now;
+  const dt = Math.min((now - lastTime) / (1000 / 60), 3);
+  lastTime = now;
+
+  step(dt);
+  stepLife(dt, now / 1000);
+  rafId = requestAnimationFrame(frame);
+}
+
+function start() {
+  if (rafId) return;
+  if (reduceMotion.matches) {
+    draw();
+    return;
+  }
+  lastTime = 0;
+  rafId = requestAnimationFrame(frame);
+}
+
+function stop() {
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = 0;
+  lastTime = 0;
+  draw();
+}
+
+// keep everyone inside the glass when the window changes size
+let resizeFrame = 0;
+window.addEventListener("resize", () => {
+  cancelAnimationFrame(resizeFrame);
+  resizeFrame = requestAnimationFrame(() => {
+    syncSeaLife();
+    measure();
+    draw();
+  });
+});
+
+// label heights can change once webfonts arrive
+document.fonts.ready.then(() => { measure(); draw(); });
+
+measure();
+draw();
+start();
+
+reduceMotion.addEventListener("change", () => {
+  if (reduceMotion.matches) stop();
+  else start();
+});
 
 /* ---------------- bubbles ---------------- */
-for (let i = 0; i < 18; i++) {
-  const b = document.createElement("div");
-  b.className = "bubble";
-  const s = rand(4, 14);
-  b.style.width = b.style.height = s + "px";
-  b.style.left = rand(0, 100) + "%";
-  b.style.animationDuration = rand(5, 14) + "s";
-  b.style.animationDelay = rand(0, 12) + "s";
-  document.getElementById("bubbles").appendChild(b);
+
+function buildBubbles() {
+  const count = window.innerWidth < 640 ? 12 : 20;
+  bubbles.replaceChildren();
+
+  for (let i = 0; i < count; i++) {
+    const b = document.createElement("span");
+    const size = rand(4, 13);
+
+    b.className = "bubble";
+    b.style.width = size.toFixed(1) + "px";
+    b.style.height = size.toFixed(1) + "px";
+    b.style.left = rand(0, 100).toFixed(2) + "%";
+    b.style.animationDuration = rand(6, 15).toFixed(2) + "s";
+    b.style.animationDelay = "-" + rand(0, 15).toFixed(2) + "s";
+
+    bubbles.appendChild(b);
+  }
 }
 
+buildBubbles();
+
 /* ---------------- retro hit counter ---------------- */
+
 document.getElementById("hitcount").textContent = "-32768";
